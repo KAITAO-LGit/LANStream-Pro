@@ -1,0 +1,57 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Data & runtime
+data/*.db
+data/*.db-journal
+data/*.db-wal
+data/*.db-shm
+logs/
+*.log
+
+# Uploads & media
+uploads/
+public/thumbnails/
+public/hls/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# OS
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Binaries (large, download separately)
+bin/ffmpeg.exe
+bin/ffprobe.exe
+
+# OpenHardwareMonitor (external tool)
+OpenHardwareMonitor/
+
+# Local-only docs (not for public repo)
+WINDOWS_INSTALL.md
+
+# Temporary
+*.tmp
+*.bak
+*.old

@@ -1,0 +1,599 @@
+/**
+ * LANStream Pro - 文件管理器样式
+ */
+
+/* ==================== 文件管理器容器 ==================== */
+.file-manager-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - var(--header-height) - var(--spacing-lg) * 2);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+/* ==================== 文件工具栏 ==================== */
+.file-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: var(--bg-tertiary);
+    border-bottom: 1px solid var(--border-color);
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+}
+
+/* ==================== 面包屑导航 ==================== */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: var(--font-size-sm);
+}
+
+.breadcrumb a {
+    color: var(--text-secondary);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
+}
+
+.breadcrumb a:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.breadcrumb a.current {
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.breadcrumb span {
+    color: var(--text-tertiary);
+}
+
+/* ==================== 工具栏操作按钮 ==================== */
+.toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.btn-toolbar {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
+    transition: all var(--transition-fast);
+}
+
+.btn-toolbar:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.btn-toolbar i {
+    font-size: var(--font-size-md);
+}
+
+/* ==================== 视图切换 ==================== */
+.view-toggle {
+    display: flex;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.view-btn {
+    width: 36px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-tertiary);
+    transition: all var(--transition-fast);
+}
+
+.view-btn:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.view-btn.active {
+    background: var(--primary-color);
+    color: var(--text-primary);
+}
+
+/* ==================== 文件内容区 ==================== */
+.file-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--spacing-md);
+}
+
+/* ==================== 网格视图 ==================== */
+.file-grid-view {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: var(--spacing-md);
+}
+
+.file-grid-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--spacing-md);
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    position: relative;
+}
+
+.file-grid-item:hover {
+    background: var(--bg-hover);
+    transform: translateY(-2px);
+}
+
+.file-grid-item.selected {
+    background: rgba(92, 157, 237, 0.2);
+    border: 2px solid var(--primary-color);
+}
+
+.file-grid-item .file-icon {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    margin-bottom: var(--spacing-sm);
+}
+
+.file-grid-item.folder .file-icon {
+    color: #ffc107;
+}
+
+.file-grid-item.video .file-icon {
+    color: #64b5f6;
+}
+
+.file-grid-item.audio .file-icon {
+    color: #ba68c8;
+}
+
+.file-grid-item.image .file-icon {
+    color: #4caf50;
+}
+
+.file-grid-item.document .file-icon {
+    color: #ff9800;
+}
+
+.file-grid-item.archive .file-icon {
+    color: #795548;
+}
+
+.file-grid-item .file-thumb {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--spacing-sm);
+}
+
+.file-grid-item .file-name {
+    font-size: var(--font-size-sm);
+    text-align: center;
+    color: var(--text-primary);
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.file-grid-item .file-size {
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+    margin-top: var(--spacing-xs);
+}
+
+/* ==================== 列表视图 ==================== */
+.file-list-view {
+    display: flex;
+    flex-direction: column;
+}
+
+.file-list-item {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.file-list-item:hover {
+    background: var(--bg-hover);
+}
+
+.file-list-item.selected {
+    background: rgba(92, 157, 237, 0.2);
+}
+
+.file-list-item .file-icon {
+    width: 40px;
+    font-size: 24px;
+    text-align: center;
+}
+
+.file-list-item .file-name {
+    flex: 1;
+    padding: 0 var(--spacing-md);
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.file-list-item .file-size {
+    width: 100px;
+    text-align: right;
+    color: var(--text-tertiary);
+    font-size: var(--font-size-sm);
+}
+
+.file-list-item .file-date {
+    width: 150px;
+    text-align: right;
+    color: var(--text-tertiary);
+    font-size: var(--font-size-sm);
+}
+
+.file-list-item .file-actions {
+    width: 80px;
+    text-align: right;
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.file-list-item:hover .file-actions {
+    opacity: 1;
+}
+
+/* ==================== 文件信息面板 ==================== */
+.file-info-panel {
+    width: 300px;
+    background: var(--bg-secondary);
+    border-left: 1px solid var(--border-color);
+    display: none;
+    flex-direction: column;
+}
+
+.file-info-panel.active {
+    display: flex;
+}
+
+.panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.panel-header h3 {
+    font-size: var(--font-size-md);
+}
+
+.btn-close-panel {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    transition: all var(--transition-fast);
+}
+
+.btn-close-panel:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.panel-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--spacing-md);
+}
+
+.panel-preview {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: var(--bg-primary);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--spacing-md);
+    overflow: hidden;
+}
+
+.panel-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.panel-preview i {
+    font-size: 64px;
+    color: var(--text-muted);
+}
+
+.panel-info-item {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.panel-info-item:last-child {
+    border-bottom: none;
+}
+
+.panel-info-item .label {
+    color: var(--text-tertiary);
+}
+
+.panel-info-item .value {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.panel-actions {
+    padding: var(--spacing-md);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.panel-actions .btn {
+    width: 100%;
+}
+
+/* ==================== 上传面板 ==================== */
+.upload-panel {
+    position: fixed;
+    bottom: var(--spacing-lg);
+    right: var(--spacing-lg);
+    width: 360px;
+    max-height: 400px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xl);
+    display: none;
+    flex-direction: column;
+    z-index: 200;
+}
+
+.upload-panel.active {
+    display: flex;
+}
+
+.upload-panel .panel-header {
+    cursor: pointer;
+}
+
+.upload-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--spacing-md);
+}
+
+.upload-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-sm);
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-sm);
+}
+
+.upload-item-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--primary-color);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+}
+
+.upload-item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.upload-item-name {
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: var(--spacing-xs);
+}
+
+.upload-item-progress {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.upload-item-progress .progress-bar {
+    flex: 1;
+    height: 4px;
+    background: var(--bg-primary);
+    border-radius: var(--radius-full);
+}
+
+.upload-item-progress .progress {
+    height: 100%;
+    background: var(--primary-color);
+    border-radius: var(--radius-full);
+}
+
+.upload-item-progress .percent {
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+    min-width: 40px;
+}
+
+/* ==================== 右键菜单 ==================== */
+.context-menu {
+    position: fixed;
+    min-width: 180px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    padding: var(--spacing-xs) 0;
+    z-index: 1000;
+    display: none;
+}
+
+.context-menu.active {
+    display: block;
+}
+
+.context-menu-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.context-menu-item:hover {
+    background: var(--bg-tertiary);
+}
+
+.context-menu-item i {
+    width: 20px;
+    text-align: center;
+    color: var(--text-tertiary);
+}
+
+.context-menu-item.danger {
+    color: var(--danger-color);
+}
+
+.context-menu-item.danger i {
+    color: var(--danger-color);
+}
+
+.context-menu hr {
+    border: none;
+    border-top: 1px solid var(--border-color);
+    margin: var(--spacing-xs) 0;
+}
+
+/* ==================== 响应式设计 ==================== */
+@media (max-width: 1024px) {
+    .file-info-panel {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 200;
+    }
+}
+
+@media (max-width: 768px) {
+    .file-toolbar {
+        padding: var(--spacing-sm);
+    }
+    
+    .file-grid-view {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    }
+    
+    .file-grid-item .file-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 32px;
+    }
+    
+    .upload-panel {
+        left: var(--spacing-md);
+        right: var(--spacing-md);
+        width: auto;
+    }
+}
+
+/* ==================== 文件拖放 ==================== */
+.file-drop-zone {
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-2xl);
+    text-align: center;
+    transition: all var(--transition-fast);
+}
+
+.file-drop-zone.drag-over {
+    border-color: var(--primary-color);
+    background: rgba(92, 157, 237, 0.1);
+}
+
+.file-drop-zone i {
+    font-size: 64px;
+    color: var(--text-muted);
+    margin-bottom: var(--spacing-md);
+}
+
+.file-drop-zone h3 {
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.file-drop-zone p {
+    color: var(--text-tertiary);
+    font-size: var(--font-size-sm);
+}
+
+/* ==================== 空状态 ==================== */
+.file-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-2xl);
+    text-align: center;
+}
+
+.file-empty i {
+    font-size: 80px;
+    color: var(--text-muted);
+    margin-bottom: var(--spacing-lg);
+}
+
+.file-empty h3 {
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.file-empty p {
+    color: var(--text-tertiary);
+    margin-bottom: var(--spacing-lg);
+}

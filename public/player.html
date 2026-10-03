@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>视频播放 - LANStream Pro</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/video-player.css">
+</head>
+<body>
+    <div class="video-player-container">
+        <!-- 顶部导航 -->
+        <header class="player-header">
+            <a href="/" class="back-btn">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                </svg>
+                <span>返回</span>
+            </a>
+            <h1 class="video-title">加载中...</h1>
+            <div class="header-actions"></div>
+        </header>
+
+        <!-- 视频播放器 -->
+        <div class="player-wrapper">
+            <video id="videoPlayer" controls>
+                您的浏览器不支持视频播放
+            </video>
+            <div id="loadingOverlay" class="loading-overlay">
+                <div class="spinner"></div>
+                <p>加载中...</p>
+            </div>
+            <div id="errorMessage" class="error-message" style="display: none;">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                </svg>
+                <p id="errorText">视频加载失败</p>
+                <button onclick="location.reload()" class="btn-retry">重试</button>
+            </div>
+        </div>
+
+        <!-- 视频信息 -->
+        <div class="video-info-section">
+            <div class="video-info-header">
+                <h2 id="videoName" class="video-name"></h2>
+                <div class="video-meta">
+                    <span class="meta-item">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
+                        </svg>
+                        <span id="viewCount">0</span> 次观看
+                    </span>
+                    <span class="meta-item">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                        </svg>
+                        <span id="videoSize">0</span>
+                    </span>
+                    <span class="meta-item">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+                        </svg>
+                        <span id="videoDuration">--:--</span>
+                    </span>
+                </div>
+            </div>
+            <p id="videoDescription" class="video-description"></p>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script>
+        // 获取视频ID
+        const urlParams = new URLSearchParams(window.location.search);
+        const videoId = urlParams.get('id');
+
+        if (!videoId) {
+            showError('未指定视频ID');
+        } else {
+            loadVideo(videoId);
+        }
+
+        /**
+         * 加载视频信息
+         */
+        async function loadVideo(id) {
+            try {
+                // 首先尝试获取用户认证信息
+                let isAuthenticated = false;
+                let authToken = localStorage.getItem('accessToken');
+                
+                if (authToken) {
+                    try {
+                        const userResponse = await fetch('/api/v1/auth/me', {
+                            headers: { 'Authorization': `Bearer ${authToken}` }
+                        });
+                        isAuthenticated = userResponse.ok;
+                    } catch (e) {
+                        console.warn('验证用户状态失败:', e);
+                    }
+                }
+
+                // 构建请求头
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                if (authToken && isAuthenticated) {
+                    headers['Authorization'] = `Bearer ${authToken}`;
+                }
+
+                // 如果已登录，尝试使用API获取视频信息
+                if (isAuthenticated && authToken) {
+                    try {
+                        const response = await fetch(`/api/v1/files/${id}`, {
+                            headers
+                        });
+                        if (response.ok) {
+                            const result = await response.json();
+                            if (result.success && result.data) {
+                                const video = result.data;
+                                displayVideoInfo(video);
+                                await setupVideoPlayer(video);
+                                return;
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('获取视频信息失败:', e);
+                    }
+                }
+
+                // 如果未登录或API失败，直接访问视频端点（无需认证）
+                const directResponse = await fetch(`/api/v1/video/${id}/info`, { headers });
+                if (directResponse.ok) {
+                    const videoData = await directResponse.json();
+                    if (videoData.success && videoData.data) {
+                        const video = videoData.data.file;
+                        displayVideoInfo(video);
+                        await setupVideoPlayer(video);
+                        return;
+                    }
+                }
+                
+                // 如果都失败，显示错误
+                showError('视频不存在或已被删除');
+            } catch (error) {
+                console.error('加载视频失败:', error);
+                showError('视频加载失败，请检查网络连接');
+            }
+        }
+
+        /**
+         * 显示视频信息
+         */
+        function displayVideoInfo(video) {
+            document.title = `${video.name} - LANStream Pro`;
+            document.querySelector('.video-title').textContent = video.name;
+            document.getElementById('videoName').textContent = video.name;
+            document.getElementById('viewCount').textContent = video.view_count || 0;
+            document.getElementById('videoSize').textContent = formatFileSize(video.size);
+            document.getElementById('videoDuration').textContent = formatDuration(video.duration);
+            document.getElementById('videoDescription').textContent = video.description || '暂无描述';
+        }
+
+        /**
+         * 设置视频播放器
+         */
+        async function setupVideoPlayer(video) {
+            const player = document.getElementById('videoPlayer');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+
+            // 获取视频流地址（异步获取）
+            // 使用原始videoId而不是video.id，确保正确获取视频流
+            const streamUrl = await api.getVideoStreamUrl(videoId);
+
+            // 显示加载状态
+            player.addEventListener('loadstart', () => {
+                loadingOverlay.querySelector('p').textContent = '正在加载视频...';
+                loadingOverlay.style.display = 'flex';
+            });
+
+            player.addEventListener('canplay', () => {
+                loadingOverlay.style.display = 'none';
+            });
+
+            player.addEventListener('error', (e) => {
+                console.error('视频播放错误:', e);
+                loadingOverlay.style.display = 'none';
+
+                // 根据错误类型显示不同信息
+                const errorCode = player.error?.code;
+                if (errorCode === 4) {
+                    // MEDIA_ERR_SRC_NOT_SUPPORTED - 视频格式不支持或文件损坏
+                    showError('视频格式不支持或文件已损坏');
+                } else if (errorCode === 3) {
+                    // MEDIA_ERR_NETWORK - 网络错误
+                    showError('视频加载失败，请检查网络连接');
+                } else {
+                    showError('视频加载失败，请稍后重试');
+                }
+            });
+
+            // 设置视频源 - 使用正确的streamUrl
+            player.src = streamUrl;
+            player.poster = api.getVideoThumbnailUrl(videoId);
+
+            // 监听网络状态
+            player.addEventListener('abort', (e) => {
+                console.log('视频加载被取消:', e);
+            });
+
+            // 尝试自动播放（可能被浏览器阻止）
+            player.play().catch(err => {
+                console.log('自动播放被阻止，等待用户交互');
+            });
+        }
+
+        /**
+         * 显示错误信息
+         */
+        function showError(message) {
+            document.querySelector('.video-title').textContent = '播放失败';
+            document.getElementById('errorText').textContent = message;
+            document.getElementById('loadingOverlay').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'flex';
+
+            // 添加返回按钮
+            const errorDiv = document.getElementById('errorMessage');
+            if (!errorDiv.querySelector('.btn-back')) {
+                const backBtn = document.createElement('button');
+                backBtn.className = 'btn-back';
+                backBtn.textContent = '返回视频列表';
+                backBtn.onclick = () => window.close();
+                backBtn.style.cssText = 'margin-top: 12px; padding: 10px 24px; font-size: 14px; color: #fff; background: #666; border: none; border-radius: 8px; cursor: pointer;';
+                errorDiv.querySelector('.btn-retry').after(backBtn);
+            }
+        }
+
+        /**
+         * 格式化文件大小
+         */
+        function formatFileSize(bytes) {
+            if (!bytes) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        /**
+         * 格式化时长
+         */
+        function formatDuration(seconds) {
+            if (!seconds || seconds <= 0) return '--:--';
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = Math.floor(seconds % 60);
+
+            if (h > 0) {
+                return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            }
+            return `${m}:${s.toString().padStart(2, '0')}`;
+        }
+    </script>
+</body>
+</html>

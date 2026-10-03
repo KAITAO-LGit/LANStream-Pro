@@ -1,0 +1,10 @@
+# 系统监控 Python 依赖
+# 安装命令: pip install -r requirements.txt
+
+# NVIDIA GPU 监控库
+# 提供了 NVIDIA GPU 的显存、占用率、温度等监控功能
+pynvml>=11.5.0
+
+# 系统监控库
+# 提供了 CPU、内存、磁盘等系统信息的监控功能
+psutil>=5.9.0

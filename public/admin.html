@@ -1,0 +1,1559 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    <meta http-equiv="Cross-Origin-Resource-Policy" content="cross-origin">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>服务器管理 - LANStream Pro</title>
+    <link rel="stylesheet" href="/css/admin.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/login.css">
+    <style>
+        /* 管理页面登录遮罩样式 */
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #f5f9fc 0%, #e8f1f8 50%, #dce9f3 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .login-overlay.hidden {
+            display: none;
+        }
+
+        .login-overlay .login-card {
+            max-width: 420px;
+            width: 90%;
+        }
+
+        .login-overlay .login-header .subtitle {
+            color: #5a6a7a;
+        }
+
+        .login-overlay .login-footer {
+            border-top-color: #d0dde8;
+        }
+
+        .login-overlay .login-footer p {
+            color: #5a6a7a;
+        }
+
+        /* Toast 容器样式 */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            padding: 14px 24px;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 14px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            background: #4caf50;
+        }
+
+        .toast.error {
+            background: #f44336;
+        }
+
+        .toast.warning {
+            background: #ff9800;
+        }
+
+        .toast.info {
+            background: #03a9f4;
+        }
+
+        /* 上传完成后操作按钮样式 */
+        .upload-actions {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .upload-actions .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* 管理页面登录表单样式 - 覆盖login.css的浮动标签效果 */
+        .login-overlay .login-form .form-group {
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .login-overlay .login-form .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #1a2a3a;
+            font-weight: 500;
+            line-height: 1.4;
+            position: static !important;
+            transform: none !important;
+            left: auto !important;
+            top: auto !important;
+        }
+
+        .login-overlay .login-form .form-group input {
+            width: 100%;
+            padding: 12px 16px !important;
+            border: 1px solid #d0dde8;
+            border-radius: 10px;
+            font-size: 14px;
+            color: #1a2a3a;
+            background: #ffffff !important;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .login-overlay .login-form .form-group input:focus {
+            outline: none;
+            border-color: #5c9ded;
+            box-shadow: 0 0 0 3px rgba(92, 157, 237, 0.15);
+        }
+
+        .login-overlay .login-form .form-group input::placeholder {
+            color: #8a9aaa;
+        }
+
+        /* 移除login.css的浮动标签效果 */
+        .login-overlay .login-form .form-group input:focus + label,
+        .login-overlay .login-form .form-group input:not(:placeholder-shown) + label {
+            transform: none !important;
+        }
+
+        /* 验证码输入框组 */
+        .captcha-input-group {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .captcha-input-group input {
+            flex: 1;
+        }
+
+        .captcha-img {
+            width: 100px;
+            height: 42px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 1px solid #d0dde8;
+        }
+
+        .login-overlay .login-form .form-options {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .login-overlay .login-form .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            color: #5a6a7a;
+            font-size: 13px;
+        }
+
+        .login-overlay .login-form .remember-me input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #5c9ded;
+            cursor: pointer;
+        }
+
+        .login-overlay .btn-login {
+            width: 100%;
+            padding: 14px 24px;
+            background: #5c9ded;
+            border: none;
+            border-radius: 10px;
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .login-overlay .btn-login:hover {
+            background: #4a8be0;
+        }
+
+        .login-overlay .btn-login:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .login-overlay .error-message {
+            color: #f44336;
+            font-size: 13px;
+            margin-top: 12px;
+            padding: 10px;
+            background: rgba(244, 67, 54, 0.1);
+            border-radius: 6px;
+            display: none;
+        }
+
+        .login-overlay .error-message.show {
+            display: block;
+        }
+
+        /* 路径输入框样式 */
+        .path-input-container {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .path-input-container input[type="text"] {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #d0dde8;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            color: #1a2a3a;
+            background: #ffffff;
+            transition: all 0.3s ease;
+        }
+
+        .path-input-container input[type="text"]:focus {
+            outline: none;
+            border-color: #5c9ded;
+            box-shadow: 0 0 0 3px rgba(92, 157, 237, 0.15);
+        }
+
+        .path-input-container input[type="text"]::placeholder {
+            color: #8a9aaa;
+            font-family: inherit;
+        }
+
+        .path-input-container .btn-secondary {
+            padding: 10px 16px;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .form-hint {
+            font-size: 12px;
+            color: #8a9aaa;
+            margin-top: 6px;
+            line-height: 1.4;
+        }
+
+        /* 密码要求提示样式 */
+        .password-requirements {
+            margin-top: 12px;
+            padding: 12px 16px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+
+        .password-requirements .requirements-title {
+            font-size: 13px;
+            font-weight: 500;
+            color: #495057;
+            margin: 0 0 10px 0;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .password-requirements .requirements-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .password-requirements .requirements-list li {
+            font-size: 12px;
+            color: #868e96;
+            padding: 4px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .password-requirements .requirements-list li .req-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+
+        .password-requirements .requirements-list li.valid {
+            color: #28a745;
+        }
+
+        .password-requirements .requirements-list li.valid .req-icon {
+            color: #28a745;
+        }
+
+        .password-requirements .requirements-list li.invalid {
+            color: #dc3545;
+        }
+
+        .password-requirements .requirements-list li.invalid .req-icon {
+            color: #dc3545;
+        }
+    </style>
+    <!-- 隐藏的假登录表单，用于诱骗浏览器密码管理器 -->
+    <!-- 浏览器会填充这个假表单，而不会填充下面的真实表单 -->
+    <div style="position: absolute !important; left: -9999px !important; top: -9999px !important; width: 0 !important; height: 0 !important; overflow: hidden !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important;" aria-hidden="true">
+        <form id="fakeLoginForm" style="display: none !important; visibility: hidden !important;">
+            <input type="text" id="fakeUsername" name="username" autocomplete="username" style="display: none !important; visibility: hidden !important;" aria-hidden="true">
+            <input type="password" id="fakePassword" name="password" autocomplete="current-password" style="display: none !important; visibility: hidden !important;" aria-hidden="true">
+        </form>
+    </div>
+</head>
+<body>
+    <!-- 隐藏的假登录表单，用于诱骗浏览器密码管理器 -->
+    <!-- 浏览器会填充这个假表单，而不会填充下面的真实表单 -->
+    <div style="position: absolute; left: -9999px; top: -9999px; opacity: 0;" aria-hidden="true">
+        <form id="fakeLoginForm" style="display: none;">
+            <input type="text" id="fakeUsername" name="username" autocomplete="username" aria-hidden="true">
+            <input type="password" id="fakePassword" name="password" autocomplete="current-password" aria-hidden="true">
+        </form>
+    </div>
+
+    <!-- 登录遮罩层 -->
+    <div class="login-overlay" id="adminLoginOverlay">
+        <div class="login-container">
+            <div class="login-card">
+                <div class="login-header">
+                    <div class="logo">
+                        <svg viewBox="0 0 24 24" fill="currentColor" style="width: 40px; height: 40px; color: #ffffff;">
+                            <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/>
+                            <path d="M12 5.5v14l-5-5 5-5z"/>
+                        </svg>
+                    </div>
+                    <h1>LANStream Pro</h1>
+                    <p class="subtitle">服务器管理</p>
+                </div>
+                <form class="login-form" id="adminLoginForm" novalidate>
+                    <div class="form-group">
+                        <label for="adminUsername">用户名</label>
+                        <input type="text" id="adminUsername" name="username" placeholder="请输入用户名" autocomplete="off" data-lpignore="true" data-form-type="other" aria-label="用户名">
+                        <button type="button" class="input-clear-btn" data-target="adminUsername" title="清除用户名"></button>
+                    </div>
+                    <div class="form-group">
+                        <label for="adminPassword">密码</label>
+                        <!-- 使用type="text"配合CSS掩盖输入内容，绕过浏览器的密码自动填充 -->
+                        <input type="text" id="adminPassword" name="admin_pass_field" placeholder="请输入密码" autocomplete="off" data-lpignore="true" data-form-type="other" style="-webkit-text-security: disc; text-security: disc;" aria-label="密码">
+                        <button type="button" class="input-clear-btn" data-target="adminPassword" title="清除密码"></button>
+                    </div>
+                    <div class="form-group" id="captchaGroup" style="display: none;">
+                        <label for="adminCaptcha">验证码</label>
+                        <div class="captcha-input-group">
+                            <input type="text" id="adminCaptcha" name="captcha" placeholder="请输入验证码" maxlength="4" autocomplete="one-time-code" aria-label="验证码">
+                            <img class="captcha-img" id="adminCaptchaImg" src="" alt="验证码" title="点击刷新">
+                        </div>
+                    </div>
+                    <div class="form-options">
+                        <label class="remember-me">
+                            <input type="checkbox" id="adminRemember" autocomplete="on" aria-label="记住登录状态">
+                            <span>记住我</span>
+                        </label>
+                    </div>
+                    <button type="button" class="btn-login" id="adminLoginBtn">
+                        <span>登录管理后台</span>
+                        <svg viewBox="0 0 24 24" fill="currentColor" style="width: 20px; height: 20px;">
+                            <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+                        </svg>
+                    </button>
+                    <div class="error-message" id="adminLoginError"></div>
+                    <div class="form-actions-clear">
+                        <button type="button" class="clear-all-btn" id="clearAllBtn" title="清除所有输入">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                            </svg>
+                            清除所有
+                        </button>
+                    </div>
+                </form>
+                <div class="login-footer">
+                    <p><strong>LANStream Pro</strong> - 局域网视频播放与文件管理系统</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="app-container" id="adminAppContainer" style="display: none;">
+        <!-- 侧边栏 -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <svg class="logo-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/>
+                        <path d="M12 5.5v14l-5-5 5-5z"/>
+                    </svg>
+                    <span class="logo-text">LANStream Pro</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="active">
+                        <a href="#" class="nav-item" data-page="server">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+                            </svg>
+                            <span>服务器管理</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="nav-item" data-page="files">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/>
+                            </svg>
+                            <span>文件管理</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="nav-item" data-page="videos">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/>
+                            </svg>
+                            <span>视频管理</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="nav-item" data-page="users">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                            </svg>
+                            <span>用户管理</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="nav-item" data-page="logs">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h2v7H7zm4-3h2v10h-2zm4 6h2v4h-2z"/>
+                            </svg>
+                            <span>系统日志</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="nav-item" data-page="settings">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+                            </svg>
+                            <span>系统设置</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="logout-btn" id="logoutBtn">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+                    </svg>
+                    <span>退出登录</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <!-- 顶部栏 -->
+            <header class="top-header">
+                <button class="menu-toggle" id="menuToggle">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </button>
+                <div class="header-title">
+                    <h1>服务器管理</h1>
+                </div>
+                <div class="header-user">
+                    <div class="user-avatar" id="headerAvatar"></div>
+                    <span class="user-name" id="headerUsername">加载中...</span>
+                </div>
+            </header>
+
+            <!-- 服务器管理页面 -->
+            <div class="page-content active" id="page-server">
+                <!-- 实时监控概览 -->
+                <div class="monitor-section">
+                    <!-- CPU监控 -->
+                    <div class="monitor-card cpu-card">
+                        <div class="monitor-header">
+                            <div class="monitor-icon">
+                                <svg viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M15 5l-1 1-1-1H8v4h8v-4h-2zM4 9v6h2v-4h12v4h2V9H4zm16 2h2v6h-2v-2h-2v-2h2v-2zm-4 4h2v2h-2v-2zm2 4h2v2h-2v-2z"/>
+                                </svg>
+                            </div>
+                            <div class="monitor-title">
+                                <span class="title-text">CPU 处理器</span>
+                                <span class="monitor-status" id="cpuStatus">正常</span>
+                            </div>
+                        </div>
+                        <div class="monitor-body">
+                            <div class="sphere-gauge cpu-sphere" id="cpuGauge">
+                                <!-- 外部进度环 - 显示真实使用率 -->
+                                <svg class="sphere-progress-ring" viewBox="0 0 120 120">
+                                    <circle class="sphere-progress-bg" cx="60" cy="60" r="45"/>
+                                    <circle class="sphere-progress-bar" id="cpuProgressBar" cx="60" cy="60" r="45"/>
+                                </svg>
+                                <div class="sphere-outer">
+                                    <div class="sphere-body">
+                                        <div class="sphere-grid"></div>
+                                        <div class="sphere-fill" id="cpuFill"></div>
+                                    </div>
+                                    <div class="sphere-ring"></div>                                    <div class="sphere-center">
+                                        <span class="sphere-value" id="cpuGaugeValue">0<span class="sphere-percent">%</span></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="monitor-details">
+                                <div class="detail-row">
+                                    <span class="detail-label">占用率</span>
+                                    <span class="detail-value" id="cpuUsage">--%</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">型号</span>
+                                    <span class="detail-value" id="cpuModel" style="font-size: 12px; color: #aaa;">--</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">核心数</span>
+                                    <span class="detail-value" id="cpuCores">--</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">温度</span>
+                                    <span class="detail-value" id="cpuTemp">--°C</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">功耗</span>
+                                    <span class="detail-value" id="cpuPower">-- W</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="monitor-chart">
+                            <canvas id="cpuChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- GPU监控 -->
+                    <div class="monitor-card gpu-card">
+                        <div class="monitor-header">
+                            <div class="monitor-icon">
+                                <svg viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M6 6h12v2H6zm0 4h12v2H6zm0 4h8v2H6zm12-8v12H2V6h12zm-2 10H4V8h12v2z"/>
+                                </svg>
+                            </div>
+                            <div class="monitor-title">
+                                <span class="title-text">GPU 显卡</span>
+                                <span class="monitor-status" id="gpuStatus">正常</span>
+                            </div>
+                        </div>
+                        <div class="monitor-body">
+                            <div class="sphere-gauge gpu-sphere" id="gpuGauge">
+                                <!-- 外部进度环 - 显示真实使用率 -->
+                                <svg class="sphere-progress-ring" viewBox="0 0 120 120">
+                                    <circle class="sphere-progress-bg" cx="60" cy="60" r="45"/>
+                                    <circle class="sphere-progress-bar" id="gpuProgressBar" cx="60" cy="60" r="45"/>
+                                </svg>
+                                <div class="sphere-outer">
+                                    <div class="sphere-body">
+                                        <div class="sphere-grid"></div>
+                                        <div class="sphere-fill" id="gpuFill"></div>
+                                    </div>
+                                    <div class="sphere-ring"></div>                                    <div class="sphere-center">
+                                        <span class="sphere-value" id="gpuGaugeValue">0<span class="sphere-percent">%</span></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="monitor-details">
+                                <div class="detail-row">
+                                    <span class="detail-label">占用率</span>
+                                    <span class="detail-value" id="gpuUsage">--%</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">温度</span>
+                                    <span class="detail-value" id="gpuTemp">--°C</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">显存</span>
+                                    <span class="detail-value" id="gpuMemory">-- / -- MB</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">功耗</span>
+                                    <span class="detail-value" id="gpuPower">-- W</span>
+                                </div>
+                                <div class="detail-row full">
+                                    <span class="detail-label">显卡型号</span>
+                                    <span class="detail-value" id="gpuName">--</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="monitor-chart">
+                            <canvas id="gpuChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- 内存监控 -->
+                    <div class="monitor-card memory-card">
+                        <div class="monitor-header">
+                            <div class="monitor-icon">
+                                <svg viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M15 9H9v6h6V9zm-2 4h-2v-2h2v2zm8-2V9h-2V7c0-1.1-.9-2-2-2h-2V3h-2v2h-2V3H9v2H7c-1.1 0-2 .9-2 2v2H3v2h2v2H3v2h2v2c0 1.1.9 2 2 2h2v2h2v-2h2v2h2v-2h2c1.1 0 2-.9 2-2v-2h2v-2h-2v-2h2zm-4 6H7V7h10v10z"/>
+                                </svg>
+                            </div>
+                            <div class="monitor-title">
+                                <span class="title-text">内存 RAM</span>
+                                <span class="monitor-status" id="memoryStatus">正常</span>
+                            </div>
+                        </div>
+                        <div class="monitor-body">
+                            <div class="sphere-gauge memory-sphere" id="memoryGauge">
+                                <!-- 外部进度环 - 显示真实使用率 -->
+                                <svg class="sphere-progress-ring" viewBox="0 0 120 120">
+                                    <circle class="sphere-progress-bg" cx="60" cy="60" r="45"/>
+                                    <circle class="sphere-progress-bar" id="memoryProgressBar" cx="60" cy="60" r="45"/>
+                                </svg>
+                                <div class="sphere-outer">
+                                    <div class="sphere-body">
+                                        <div class="sphere-grid"></div>
+                                        <div class="sphere-fill" id="memoryFill"></div>
+                                    </div>
+                                    <div class="sphere-ring"></div>                                    <div class="sphere-center">
+                                        <span class="sphere-value" id="memoryGaugeValue">0<span class="sphere-percent">%</span></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="monitor-details">
+                                <div class="detail-row">
+                                    <span class="detail-label">已用</span>
+                                    <span class="detail-value" id="memoryUsed">-- GB</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">总计</span>
+                                    <span class="detail-value" id="memoryTotal">-- GB</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">使用率</span>
+                                    <span class="detail-value" id="memoryPercent">--%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="monitor-chart">
+                            <canvas id="memoryChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- 硬盘监控 -->
+                    <div class="monitor-card disk-card">
+                        <div class="monitor-header">
+                            <div class="monitor-icon">
+                                <svg viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M20 6H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/>
+                                </svg>
+                            </div>
+                            <div class="monitor-title">
+                                <span class="title-text">硬盘存储</span>
+                                <span class="monitor-status" id="diskStatus">正常</span>
+                            </div>
+                        </div>
+                        <div class="monitor-body">
+                            <div class="sphere-gauge disk-sphere" id="diskGauge">
+                                <!-- 外部进度环 - 显示真实使用率 -->
+                                <svg class="sphere-progress-ring" viewBox="0 0 120 120">
+                                    <circle class="sphere-progress-bg" cx="60" cy="60" r="45"/>
+                                    <circle class="sphere-progress-bar" id="diskProgressBar" cx="60" cy="60" r="45"/>
+                                </svg>
+                                <div class="sphere-outer">
+                                    <div class="sphere-body">
+                                        <div class="sphere-grid"></div>
+                                        <div class="sphere-fill" id="diskFill"></div>
+                                    </div>
+                                    <div class="sphere-ring"></div>                                    <div class="sphere-center">
+                                        <span class="sphere-value" id="diskGaugeValue">0<span class="sphere-percent">%</span></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="monitor-details">
+                                <div class="detail-row">
+                                    <span class="detail-label">已用</span>
+                                    <span class="detail-value" id="diskUsed">-- GB</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">总计</span>
+                                    <span class="detail-value" id="diskTotal">-- GB</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">使用率</span>
+                                    <span class="detail-value" id="diskPercent">--%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="monitor-chart">
+                            <canvas id="diskChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 系统信息与在线用户 -->
+                <div class="info-section">
+                    <!-- 在线用户 -->
+                    <div class="info-card users-card">
+                        <div class="info-header">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                            </svg>
+                            <span>实时在线用户</span>
+                        </div>
+                        <div class="users-count">
+                            <span class="count-number" id="onlineCount">0</span>
+                            <span class="count-unit">人在线</span>
+                        </div>
+                        <div class="users-list" id="onlineUsersList">
+                            <div class="user-item empty">暂无用户在线</div>
+                        </div>
+                    </div>
+
+                    <!-- 系统信息 -->
+                    <div class="info-card system-card">
+                        <div class="info-header">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93z"/>
+                            </svg>
+                            <span>系统信息</span>
+                        </div>
+                        <div class="system-info-grid">
+                            <div class="info-item">
+                                <span class="info-label">服务器</span>
+                                <span class="info-value" id="serverName">LANStream Pro</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">版本</span>
+                                <span class="info-value" id="serverVersion">--</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">运行时间</span>
+                                <span class="info-value" id="serverUptime">--</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">当前时间</span>
+                                <span class="info-value" id="currentTime">--</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">当前日期</span>
+                                <span class="info-value" id="currentDate">--</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">操作系统</span>
+                                <span class="info-value" id="osInfo">--</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">IP地址</span>
+                                <span class="info-value" id="localIP">--</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">文件总数</span>
+                                <span class="info-value" id="totalFiles">--</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 视频管理页面 -->
+            <div class="page-content" id="page-videos">
+                <div class="content-header">
+                    <h2>视频文件管理</h2>
+                    <div class="content-header-description">
+                        <p>管理视频资料库，支持添加本地视频、上传新视频和批量扫描文件夹。添加本地视频可将服务器上的视频文件导入系统，上传功能支持拖拽操作。</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-success" id="addLocalVideoBtn" title="添加本地视频">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/>
+                            </svg>
+                            添加本地视频
+                        </button>
+                        <button class="btn btn-primary" id="uploadVideoBtn">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
+                            </svg>
+                            上传视频
+                        </button>
+                        <button class="btn btn-secondary" id="refreshVideosBtn">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+                            </svg>
+                            刷新
+                        </button>
+                        <button class="btn btn-secondary" id="scanUploadsBtn" style="background: #8b5cf6; color: white; border-color: #8b5cf6;">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/>
+                            </svg>
+                            扫描uploads文件夹
+                        </button>
+                    </div>
+                </div>
+                <div class="content-body">
+                    <div class="video-stats-row">
+                        <div class="stat-item">
+                            <span class="stat-label">视频总数</span>
+                            <span class="stat-value" id="videoTotalCount">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">总大小</span>
+                            <span class="stat-value" id="videoTotalSize">0 B</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">今日上传</span>
+                            <span class="stat-value" id="videoTodayCount">0</span>
+                        </div>
+                    </div>
+                    <div class="video-grid" id="videoGrid">
+                        <div class="loading-state">
+                            <div class="spinner"></div>
+                            <span>加载中...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 用户管理页面 -->
+            <div class="page-content" id="page-users">
+                <div class="content-header">
+                    <h2>用户管理</h2>
+                    <div class="content-header-description">
+                        <p>管理系统用户账户，包括添加新用户、编辑用户信息、分配角色和禁用账户。管理员可以执行所有操作。</p>
+                    </div>
+                    <button class="btn btn-success" id="addUserBtn">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                        </svg>
+                        添加用户
+                    </button>
+                </div>
+                <div class="content-body">
+                    <!-- 用户筛选工具栏 -->
+                    <div class="filter-toolbar">
+                        <div class="filter-group">
+                            <label for="userStatusFilter">状态筛选：</label>
+                            <select id="userStatusFilter" class="filter-select" aria-label="筛选用户状态">
+                                <option value="all">全部状态</option>
+                                <option value="active">正常</option>
+                                <option value="pending">待验证</option>
+                                <option value="locked">锁定</option>
+                                <option value="suspended">停用</option>
+                                <option value="disabled">禁用</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="userRoleFilter">角色筛选：</label>
+                            <select id="userRoleFilter" class="filter-select" aria-label="筛选用户角色">
+                                <option value="all">全部角色</option>
+                                <option value="superadmin">超级管理员</option>
+                                <option value="admin">管理员</option>
+                                <option value="moderator">版主</option>
+                                <option value="vip">VIP用户</option>
+                                <option value="user">普通用户</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="userSearchInput" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">搜索用户名</label>
+                            <input type="text" id="userSearchInput" placeholder="搜索用户名..." class="filter-input" aria-label="搜索用户名">
+                        </div>
+                        <button class="btn btn-secondary" onclick="loadUsers(true)">
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                                <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+                            </svg>
+                            刷新
+                        </button>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>用户ID</th>
+                                    <th>用户名</th>
+                                    <th>显示名称</th>
+                                    <th>角色</th>
+                                    <th>状态</th>
+                                    <th>最后登录</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody">
+                                <tr class="loading-row">
+                                    <td colspan="7">加载中...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 文件管理页面 -->
+            <div class="page-content" id="page-files">
+                <div class="content-header">
+                    <h2>文件管理</h2>
+                    <div class="content-header-description">
+                        <p>管理系统本地文件和上传文件。添加本地文件可将服务器上的媒体文件添加到资料库，上传文件功能支持批量上传。定期清理无效文件可以释放存储空间。</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-success" id="addLocalFileBtn" onclick="openLocalFileModal()" title="添加本地文件">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/>
+                            </svg>
+                            添加本地文件
+                        </button>
+                        <button class="btn btn-primary" id="uploadFileBtn">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
+                            </svg>
+                            上传文件
+                        </button>
+                        <button class="btn btn-secondary" id="cleanupFilesBtn">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                            </svg>
+                            清理无效文件
+                        </button>
+                        <button class="btn btn-secondary" id="scanUploadsBtn" style="background: #8b5cf6; color: white; border-color: #8b5cf6;">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/>
+                            </svg>
+                            扫描uploads文件夹
+                        </button>
+                    </div>
+                </div>
+                <div class="content-body">
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <div class="stat-box-value" id="totalFilesCount">0</div>
+                            <div class="stat-box-label">总文件数</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-box-value" id="totalVideosCount">0</div>
+                            <div class="stat-box-label">视频文件</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-box-value" id="totalStorageSize">0 B</div>
+                            <div class="stat-box-label">总大小</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-box-value" id="storageUsagePercent">0%</div>
+                            <div class="stat-box-label">存储使用</div>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>文件名</th>
+                                    <th>类型</th>
+                                    <th>大小</th>
+                                    <th>上传时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="filesTableBody">
+                                <tr class="loading-row">
+                                    <td colspan="5">加载中...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 系统设置页面 -->
+            <div class="page-content" id="page-settings">
+                <div class="content-header">
+                    <h2>系统设置</h2>
+                    <div class="content-header-description">
+                        <p>管理服务器基础配置和安全性设置。修改后点击保存按钮应用更改。</p>
+                    </div>
+                </div>
+                <div class="content-body">
+                    <div class="settings-form">
+                        <div class="form-section">
+                            <h4>服务器设置</h4>
+                            <div class="form-row">
+                                <div class="form-label-group">
+                                    <label for="serverPort">服务器端口</label>
+                                    <input type="number" id="serverPort" placeholder="3000" min="1" max="65535" aria-label="服务器端口">
+                                </div>
+                                <div class="form-hint-column">
+                                    <span class="form-hint">1-65535之间的有效端口号</span>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-label-group">
+                                    <label for="uploadLimit">上传大小限制</label>
+                                    <input type="number" id="uploadLimit" placeholder="5" min="1001" max="" aria-label="上传大小限制">
+                                </div>
+                                <div class="form-hint-column">
+                                    <span class="form-hint">单个文件上传大小上限（GB）</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-section">
+                            <h4>安全设置</h4>
+                            <div class="form-row">
+                                <div class="form-label-group">
+                                    <label for="sessionTimeout">会话超时</label>
+                                    <input type="number" id="sessionTimeout" placeholder="120" min="5" max="10080" aria-label="会话超时时间">
+                                </div>
+                                <div class="form-hint-column">
+                                    <span class="form-hint">用户无操作后的自动退出时间（分钟）</span>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-label-group">
+                                    <label for="enableCaptcha">登录验证码</label>
+                                    <div class="checkbox-group-inline">
+                                        <input type="checkbox" id="enableCaptcha" aria-label="启用验证码">
+                                        <label for="enableCaptcha">启用登录验证码</label>
+                                    </div>
+                                </div>
+                                <div class="form-hint-column">
+                                    <span class="form-hint">登录时需要输入验证码增强安全性</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn btn-primary btn-lg" id="saveSettingsBtn">
+                                <svg viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                </svg>
+                                保存设置
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 系统日志页面 -->
+            <div class="page-content" id="page-logs">
+                <div class="content-header">
+                    <h2>系统日志</h2>
+                    <div class="content-header-description">
+                        <p>查看服务器运行日志，按级别筛选以快速定位问题。日志记录包含时间戳、级别和详细信息。</p>
+                    </div>
+                    <div class="log-filters">
+                        <select id="logLevel" aria-label="选择日志级别">
+                            <option value="">全部级别</option>
+                            <option value="info">INFO</option>
+                            <option value="warn">WARN</option>
+                            <option value="error">ERROR</option>
+                            <option value="debug">DEBUG</option>
+                        </select>
+                        <button class="btn btn-info" id="refreshLogsBtn">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+                            </svg>
+                            刷新
+                        </button>
+                    </div>
+                </div>
+                <div class="content-body">
+                    <div class="log-container" id="logContainer">
+                        <div class="log-empty">暂无日志记录</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 添加用户模态框 -->
+    <div class="modal" id="userModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="userModalTitle">添加用户</h3>
+                <button class="modal-close" id="closeUserModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="userForm">
+                    <input type="hidden" id="editUserId" aria-hidden="true">
+                    <!-- 基本信息 -->
+                    <div class="form-section-divider">
+                        <span class="section-label">基本信息</span>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-label-group">
+                            <label for="newUsername">用户名</label>
+                            <input type="text" id="newUsername" name="username" placeholder="请输入用户名" autocomplete="username" required aria-label="用户名">
+                        </div>
+                        <div class="form-hint-column">
+                            <span class="form-hint">必填，唯一标识符</span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-label-group">
+                            <label for="newDisplayName">显示名称</label>
+                            <input type="text" id="newDisplayName" name="display_name" placeholder="请输入显示名称" autocomplete="name" aria-label="显示名称">
+                        </div>
+                        <div class="form-hint-column">
+                            <span class="form-hint">用于显示的名字，可重复</span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-label-group">
+                            <label for="newEmail">邮箱</label>
+                            <input type="email" id="newEmail" name="email" placeholder="请输入邮箱" autocomplete="email" aria-label="邮箱">
+                        </div>
+                        <div class="form-hint-column">
+                            <span class="form-hint">用于接收通知</span>
+                        </div>
+                    </div>
+                    <!-- 账户设置 -->
+                    <div class="form-section-divider">
+                        <span class="section-label">账户设置</span>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-label-group">
+                            <label for="newPassword">密码</label>
+                            <input type="password" id="newPassword" name="password" placeholder="请输入密码" autocomplete="new-password" aria-label="密码">
+                        </div>
+                        <div class="form-hint-column">
+                            <span class="form-hint">至少6位，包含大小写字母和数字</span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-label-group">
+                            <label for="newRole">角色</label>
+                            <select id="newRole" name="role" aria-label="选择用户角色">
+                                <option value="user">普通用户</option>
+                                <option value="vip">VIP用户</option>
+                                <option value="moderator">版主</option>
+                                <option value="admin">管理员</option>
+                                <option value="superadmin">超级管理员</option>
+                            </select>
+                        </div>
+                        <div class="form-hint-column">
+                            <span class="form-hint">普通用户 &lt; VIP &lt; 版主 &lt; 管理员 &lt; 超级管理员</span>
+                        </div>
+                    </div>
+                    <div class="form-row" id="statusRow">
+                        <div class="form-label-group">
+                            <label for="newUserStatus">账户状态</label>
+                            <select id="newUserStatus" name="status" aria-label="选择用户状态">
+                                <option value="active">正常</option>
+                                <option value="pending">待验证</option>
+                                <option value="locked">锁定</option>
+                                <option value="suspended">停用</option>
+                                <option value="disabled">禁用</option>
+                            </select>
+                        </div>
+                        <div class="form-hint-column">
+                            <span class="form-hint">
+                                <span style="color: #10b981;">● 正常</span> - 正常使用<br>
+                                <span style="color: #f59e0b;">● 待验证</span> - 等待邮箱验证<br>
+                                <span style="color: #6b7280;">● 锁定</span> - 安全锁定<br>
+                                <span style="color: #8b5cf6;">● 停用</span> - 临时停用<br>
+                                <span style="color: #ef4444;">● 禁用</span> - 禁止登录
+                            </span>
+                        </div>
+                    </div>
+                    <!-- 密码要求提示 -->
+                    <div class="password-requirements-panel" id="passwordRequirementsPanel">
+                        <div class="requirements-header">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                            </svg>
+                            <span>密码要求</span>
+                        </div>
+                        <ul class="requirements-list">
+                            <li id="req-length"><span class="req-icon">○</span>至少6个字符</li>
+                            <li id="req-letter"><span class="req-icon">○</span>包含字母（大小写均可）</li>
+                            <li id="req-number"><span class="req-icon">○</span>包含数字 (0-9)</li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelUserBtn">取消</button>
+                <button class="btn btn-primary" id="saveUserBtn">
+                    <svg viewBox="0 0 24 24" fill="currentColor" style="width: 18px; height: 18px;">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    保存
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 上传文件模态框 -->
+    <div class="modal" id="uploadModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>上传文件</h3>
+                <button class="modal-close" id="closeUploadModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="upload-dropzone" id="uploadDropzone">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
+                    </svg>
+                    <p>拖拽文件到此处或点击选择</p>
+                    <input type="file" id="fileInput" multiple style="display: none;" aria-hidden="true">
+                </div>
+                <div class="upload-progress" id="uploadProgress" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress" id="uploadProgressBar"></div>
+                    </div>
+                    <span class="progress-text" id="uploadProgressText">0%</span>
+                </div>
+                <!-- 上传完成后的操作按钮 -->
+                <div class="upload-actions" id="uploadActions" style="display: none;">
+                    <button class="btn btn-secondary" id="openFolderBtn" title="在新标签页中打开上传文件夹">
+                        <svg viewBox="0 0 24 24" fill="currentColor" style="width: 18px; height: 18px;">
+                            <path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/>
+                        </svg>
+                        <span>打开文件夹</span>
+                    </button>
+                    <button class="btn btn-primary" id="closeUploadDoneBtn">完成</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加本地视频模态框 -->
+    <div class="modal" id="localVideoModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3><svg viewBox="0 0 24 24" fill="currentColor" style="width: 20px; height: 20px; margin-right: 8px;">
+                    <path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/>
+                </svg>添加本地视频</h3>
+                <button class="modal-close" id="closeLocalVideoModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- 标签页切换 -->
+                <div class="modal-tabs">
+                    <button class="tab-btn active" data-tab="single">
+                        <svg viewBox="0 0 24 24" fill="currentColor" style="width: 16px; height: 16px; margin-right: 6px;">
+                            <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+                        </svg>单个文件
+                    </button>
+                    <button class="tab-btn" data-tab="batch">
+                        <svg viewBox="0 0 24 24" fill="currentColor" style="width: 16px; height: 16px; margin-right: 6px;">
+                            <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/>
+                        </svg>批量选择
+                    </button>
+                    <button class="tab-btn" data-tab="folder">
+                        <svg viewBox="0 0 24 24" fill="currentColor" style="width: 16px; height: 16px; margin-right: 6px;">
+                            <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
+                        </svg>扫描文件夹
+                    </button>
+                </div>
+
+                <!-- 单个文件标签页 -->
+                <div class="tab-content active" id="tab-single">
+                    <div class="form-group">
+                        <label for="localVideoPath">视频路径</label>
+                        <div class="path-input-row">
+                            <input type="text" id="localVideoPath" placeholder="/mnt/videos/movie.mp4 或 D:\Videos\movie.mp4" aria-label="视频文件路径">
+                            <button class="btn-secondary btn-icon-sm" id="browsePathBtn" title="选择文件">
+                                <svg viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2zm0 12H4V8h16v10z"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <p class="form-hint">支持绝对路径（Windows 和 Linux 格式）</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="localVideoName">显示名称</label>
+                        <input type="text" id="localVideoName" name="video_name" placeholder="留空则自动从路径提取" aria-label="视频显示名称">
+                        <p class="form-hint">自定义视频显示名称</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="localVideoDescription">描述</label>
+                        <textarea id="localVideoDescription" rows="2" placeholder="输入视频描述..." aria-label="视频描述"></textarea>
+                        <p class="form-hint">添加视频描述信息</p>
+                    </div>
+                </div>
+
+                <!-- 批量选择标签页 -->
+                <div class="tab-content" id="tab-batch">
+                    <div class="form-group">
+                        <label for="batchVideoInput">选择视频文件</label>
+                        <div class="dropzone dropzone-sm" id="batchVideoDropzone">
+                            <svg viewBox="0 0 24 24" fill="currentColor" style="width: 28px; height: 28px; opacity: 0.5;">
+                                <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
+                            </svg>
+                            <p>拖放视频文件到此处，或点击选择</p>
+                            <input type="file" id="batchVideoInput" accept="video/*" multiple aria-label="选择视频文件">
+                        </div>
+                    </div>
+                    <!-- 已选文件列表 -->
+                    <div class="selected-files-container">
+                        <div class="selected-files-header">
+                            <span>已选择 <strong id="selectedCount">0</strong> 个视频</span>
+                            <button class="btn-text btn-text-sm" id="clearSelectedBtn">
+                                <svg viewBox="0 0 24 24" fill="currentColor" style="width: 14px; height: 14px; margin-right: 4px;">
+                                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                                </svg>清空
+                            </button>
+                        </div>
+                        <div class="selected-files-list" id="selectedFilesList">
+                            <div class="empty-state">尚未选择文件</div>
+                        </div>
+                    </div>
+                    <div class="batch-options">
+                        <div class="form-group">
+                            <label for="batchNamePrefix">名称前缀</label>
+                            <input type="text" id="batchNamePrefix" name="batch_prefix" placeholder="统一前缀" aria-label="视频名称前缀">
+                            <p class="form-hint">为所有视频添加统一前缀</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="batchDescription">统一描述</label>
+                            <textarea id="batchDescription" rows="2" placeholder="统一描述..." aria-label="批量视频描述"></textarea>
+                            <p class="form-hint">为所有视频添加统一描述</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 扫描文件夹标签页 -->
+                <div class="tab-content" id="tab-folder">
+                    <div class="form-group">
+                        <label for="folderInput">选择文件夹</label>
+                        <div class="dropzone dropzone-sm" id="folderDropzone">
+                            <svg viewBox="0 0 24 24" fill="currentColor" style="width: 28px; height: 28px; opacity: 0.5;">
+                                <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2zm0 12H4V8h16v10z"/>
+                            </svg>
+                            <p>选择包含视频的文件夹，自动扫描并添加</p>
+                            <input type="file" id="folderInput" webkitdirectory directory aria-label="选择文件夹">
+                        </div>
+                    </div>
+                    <!-- 文件夹预览 -->
+                    <div class="folder-preview" id="folderPreview" style="display: none;">
+                        <div class="preview-header">
+                            <svg viewBox="0 0 24 24" fill="currentColor" style="width: 18px; height: 18px; color: var(--primary-color);">
+                                <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
+                            </svg>
+                            <span class="folder-path" id="folderPath">--</span>
+                        </div>
+                        <div class="preview-stats">
+                            <span>找到 <strong id="foundVideos">0</strong> 个视频</span>
+                            <span>预计: <strong id="estimatedSize">0</strong></span>
+                        </div>
+                        <div class="scan-options">
+                            <label class="checkbox-item">
+                                <input type="checkbox" id="recursiveScan" checked aria-label="递归扫描子文件夹">
+                                <span>递归扫描</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" id="useFolderAsPrefix" checked aria-label="使用文件夹名称作为前缀">
+                                <span>文件夹名作为前缀</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 验证状态 -->
+                <div id="localVideoStatus" class="local-video-status"></div>
+            </div>
+            <div class="modal-footer modal-footer-compact">
+                <button class="btn-secondary btn-sm" id="cancelLocalVideoBtn">取消</button>
+                <button class="btn-primary btn-sm" id="saveLocalVideoBtn" disabled>
+                    <svg viewBox="0 0 24 24" fill="currentColor" style="width: 14px; height: 14px; margin-right: 4px;">
+                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                    </svg>
+                    <span id="saveBtnText">添加视频</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 隐藏的文件选择输入框 -->
+    <input type="file" id="localVideoFileInput" accept="video/*" style="display: none;" aria-hidden="true">
+    <input type="file" id="localVideoFolderInput" webkitdirectory directory multiple style="display: none;" aria-hidden="true">
+
+    <!-- 添加本地文件模态框 -->
+    <div class="modal" id="localFileModal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3>添加本地文件</h3>
+                <button class="modal-close" id="closeLocalFileModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- 标签页切换 -->
+                <div class="modal-tabs">
+                    <button class="tab-btn active" data-tab="file-single">单个文件</button>
+                    <button class="tab-btn" data-tab="file-batch">批量选择</button>
+                    <button class="tab-btn" data-tab="file-folder">扫描文件夹</button>
+                </div>
+
+                <!-- 单个文件标签页 -->
+                <div class="tab-content active" id="tab-file-single">
+                    <div class="form-group">
+                        <label for="localFilePath">文件路径</label>
+                        <div class="path-input-container">
+                            <input type="text" id="localFilePath" placeholder="/mnt/data/document.pdf 或 D:\Docs\file.pdf" aria-label="文件路径">
+                            <button class="btn-secondary" id="browseFilePathBtn" title="选择文件">
+                                <svg viewBox="0 0 24 24" fill="currentColor" style="width: 18px; height: 18px;">
+                                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <p class="form-hint">输入服务器上文件的完整路径，支持绝对路径</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="localFileName">显示名称（可选）</label>
+                        <input type="text" id="localFileName" name="file_name" placeholder="留空则自动从路径提取" aria-label="文件显示名称">
+                    </div>
+                    <div class="form-group">
+                        <label for="localFileDescription">描述（可选）</label>
+                        <textarea id="localFileDescription" name="file_description" rows="2" placeholder="输入文件描述..." aria-label="文件描述"></textarea>
+                    </div>
+                </div>
+
+                <!-- 批量选择标签页 -->
+                <div class="tab-content" id="tab-file-batch">
+                    <div class="form-group">
+                        <label for="batchFileInput">选择多个文件</label>
+                        <div class="dropzone file-dropzone" id="batchFileDropzone">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/>
+                            </svg>
+                            <p>拖拽多个文件到此处，或点击选择</p>
+                            <input type="file" id="batchFileInput" multiple aria-label="选择批量文件">
+                        </div>
+                    </div>
+                    <div class="selected-files-container">
+                        <div class="selected-files-header">
+                            <span>已选择 <strong id="fileSelectedCount">0</strong> 个文件</span>
+                            <button class="btn-text" id="clearFileSelectedBtn">清空</button>
+                        </div>
+                        <div class="selected-files-list" id="fileSelectedList">
+                            <div class="empty-state">尚未选择文件</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 扫描文件夹标签页 -->
+                <div class="tab-content" id="tab-file-folder">
+                    <div class="form-group">
+                        <label for="fileFolderInput">选择要扫描的文件夹</label>
+                        <div class="dropzone file-dropzone" id="fileFolderDropzone">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/>
+                            </svg>
+                            <p>选择文件夹，自动扫描并添加所有文件</p>
+                            <input type="file" id="fileFolderInput" webkitdirectory directory multiple aria-label="选择文件文件夹">
+                        </div>
+                    </div>
+                    <div class="folder-preview" id="fileFolderPreview" style="display: none;">
+                        <div class="preview-header">
+                            <span class="folder-icon">📁</span>
+                            <span class="folder-path" id="fileFolderPath">--</span>
+                        </div>
+                        <div class="preview-stats">
+                            <span>找到 <strong id="fileFoundCount">0</strong> 个文件</span>
+                            <span>预计总大小: <strong id="fileEstimatedSize">0</strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 验证状态 -->
+                <div id="localFileStatus" class="local-video-status"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="openFileFolderBtn" title="打开文件文件夹">
+                    <svg viewBox="0 0 24 24" fill="currentColor" style="width: 18px; height: 18px;">
+                        <path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/>
+                    </svg>
+                    打开文件夹
+                </button>
+                <button class="btn-secondary" id="cancelLocalFileBtn">取消</button>
+                <button class="btn-primary" id="saveLocalFileBtn" disabled>
+                    <span id="fileSaveBtnText">添加文件</span>
+                    <span id="fileSaveBtnCount" style="display: none;"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 本地文件选择输入框 -->
+    <input type="file" id="localSingleFileInput" style="display: none;" aria-hidden="true">
+    <input type="file" id="localBatchFileInput" multiple style="display: none;" aria-hidden="true">
+    <input type="file" id="localFileFolderInput" webkitdirectory directory multiple style="display: none;" aria-hidden="true">
+
+    <!-- Toast 提示容器 -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- HLS.js 库（用于支持流媒体播放） -->
+    <script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js"></script>
+
+    <!-- 内嵌视频播放器模态框 -->
+    <div class="modal" id="videoPlayerModal">
+        <div class="modal-content" style="max-width: 1200px; width: 95%;">
+            <div class="modal-header">
+                <h3 id="videoPlayerTitle">视频播放</h3>
+                <button class="modal-close" id="closeVideoPlayerModal">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 0;">
+                <div class="video-player-container" id="videoPlayerContainer">
+                    <video id="inlineVideoPlayer" controls style="width: 100%; max-height: 70vh; background: #000;">
+                        您的浏览器不支持视频播放
+                    </video>
+                </div>
+                <div class="video-player-info" id="videoPlayerInfo" style="padding: 15px 20px; background: #f8f9fa; border-top: 1px solid #e9ecef;">
+                    <div class="player-video-name" id="playerVideoName" style="font-size: 16px; font-weight: 500; margin-bottom: 8px;">--</div>
+                    <div class="player-video-meta" style="display: flex; gap: 20px; color: #6c757d; font-size: 13px;">
+                        <span id="playerVideoDuration">时长: --</span>
+                        <span id="playerVideoSize">大小: --</span>
+                        <span id="playerVideoViews">播放: --</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Socket.IO 客户端库（用于在线用户统计） -->
+    <script src="/socket.io/socket.io.js"></script>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/transcoding-checker.js"></script>
+    <script src="/js/admin.js"></script>
+    <script src="/js/playvideo-override.js"></script>
+</body>
+</html>

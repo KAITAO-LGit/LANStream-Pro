@@ -1,0 +1,571 @@
+/**
+ * LANStream Pro - 视频播放和展示样式
+ * 仿腾讯视频/芒果视频风格
+ */
+
+/* ==================== 视频网格布局 ==================== */
+.video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+/* ==================== 视频卡片 ==================== */
+.video-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    position: relative;
+}
+
+.video-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-xl);
+}
+
+.video-card:hover .video-cover img {
+    transform: scale(1.05);
+}
+
+.video-card:hover .video-play-btn {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+/* ==================== 视频封面 ==================== */
+.video-cover {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+}
+
+.video-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--transition-normal);
+}
+
+.video-cover .duration {
+    position: absolute;
+    bottom: var(--spacing-sm);
+    right: var(--spacing-sm);
+    padding: 2px 6px;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    color: var(--text-primary);
+}
+
+.video-play-btn {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.8);
+    width: 64px;
+    height: 64px;
+    background: rgba(92, 157, 237, 0.95);
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all var(--transition-normal);
+}
+
+.video-play-btn i {
+    font-size: 28px;
+    color: var(--text-primary);
+    margin-left: 4px;
+}
+
+/* ==================== 视频信息 ==================== */
+.video-info {
+    padding: var(--spacing-md);
+}
+
+.video-title {
+    font-size: var(--font-size-md);
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-xs);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.video-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    font-size: var(--font-size-sm);
+    color: var(--text-tertiary);
+}
+
+.video-meta span {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+/* ==================== 横向滚动列表 ==================== */
+.video-scroll-list {
+    display: flex;
+    gap: var(--spacing-md);
+    overflow-x: auto;
+    padding-bottom: var(--spacing-md);
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+}
+
+.video-scroll-list::-webkit-scrollbar {
+    height: 6px;
+}
+
+.video-scroll-list::-webkit-scrollbar-thumb {
+    background: var(--bg-hover);
+    border-radius: var(--radius-full);
+}
+
+.video-scroll-list .video-card {
+    flex-shrink: 0;
+    width: 280px;
+    scroll-snap-align: start;
+}
+
+/* ==================== 横幅轮播 ==================== */
+.hero-banner {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 7;
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    margin-bottom: var(--spacing-2xl);
+}
+
+.banner-slides {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.banner-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity var(--transition-slow);
+}
+
+.banner-slide.active {
+    opacity: 1;
+}
+
+.banner-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.banner-slide::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60%;
+    background: linear-gradient(to top, var(--bg-primary), transparent);
+}
+
+.banner-content {
+    position: absolute;
+    bottom: var(--spacing-xl);
+    left: var(--spacing-xl);
+    z-index: 10;
+    max-width: 500px;
+}
+
+.banner-title {
+    font-size: var(--font-size-3xl);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-sm);
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.banner-desc {
+    font-size: var(--font-size-md);
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-lg);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.banner-controls {
+    position: absolute;
+    bottom: var(--spacing-xl);
+    right: var(--spacing-xl);
+    display: flex;
+    gap: var(--spacing-sm);
+    z-index: 10;
+}
+
+.banner-btn {
+    width: 44px;
+    height: 44px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+    transition: all var(--transition-fast);
+}
+
+.banner-btn:hover {
+    background: var(--primary-color);
+}
+
+/* ==================== 视频播放器模态框 ==================== */
+.modal-content.video-player-content {
+    width: 90vw;
+    max-width: 1200px;
+    background: var(--bg-primary);
+    padding: 0;
+}
+
+.video-player-container {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #000;
+}
+
+#main-video-player {
+    width: 100%;
+    height: 100%;
+}
+
+.video-info {
+    padding: var(--spacing-lg);
+}
+
+.video-info h2 {
+    font-size: var(--font-size-xl);
+    margin-bottom: var(--spacing-sm);
+}
+
+.video-info p {
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-md);
+}
+
+.video-actions {
+    display: flex;
+    gap: var(--spacing-md);
+}
+
+.btn-action {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    transition: all var(--transition-fast);
+}
+
+.btn-action:hover {
+    background: var(--primary-color);
+}
+
+.btn-action i {
+    font-size: var(--font-size-lg);
+}
+
+/* ==================== 收藏按钮状态 ==================== */
+.btn-action.favorited {
+    background: rgba(92, 157, 237, 0.2);
+    color: var(--primary-color);
+}
+
+.btn-action.favorited i.far {
+    display: none;
+}
+
+.btn-action.favorited i.fas {
+    display: inline;
+}
+
+.btn-action i.fas {
+    display: none;
+}
+
+/* ==================== 相关视频推荐 ==================== */
+.related-videos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--spacing-md);
+    padding: var(--spacing-lg);
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
+}
+
+.related-video-item {
+    display: flex;
+    gap: var(--spacing-sm);
+    cursor: pointer;
+    transition: transform var(--transition-fast);
+}
+
+.related-video-item:hover {
+    transform: translateX(4px);
+}
+
+.related-thumb {
+    width: 120px;
+    height: 68px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.related-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.related-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.related-title {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-xs);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.related-meta {
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+}
+
+/* ==================== 视频分类标签 ==================== */
+.video-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-sm);
+}
+
+.video-tag {
+    padding: 2px 8px;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+}
+
+.video-tag.hot {
+    background: rgba(92, 157, 237, 0.2);
+    color: var(--primary-color);
+}
+
+/* ==================== 播放进度条 ==================== */
+.play-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: var(--primary-color);
+    transition: width var(--transition-fast);
+}
+
+/* ==================== 视频评分 ==================== */
+.video-rating {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-sm);
+}
+
+.video-rating i {
+    color: #ffc107;
+    font-size: var(--font-size-sm);
+}
+
+.video-rating span {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+/* ==================== 响应式设计 ==================== */
+@media (max-width: 1024px) {
+    .hero-banner {
+        aspect-ratio: 16 / 9;
+    }
+    
+    .banner-title {
+        font-size: var(--font-size-2xl);
+    }
+    
+    .video-grid {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-banner {
+        border-radius: var(--radius-lg);
+    }
+    
+    .banner-content {
+        bottom: var(--spacing-md);
+        left: var(--spacing-md);
+    }
+    
+    .banner-title {
+        font-size: var(--font-size-xl);
+    }
+    
+    .banner-desc {
+        display: none;
+    }
+    
+    .banner-controls {
+        bottom: var(--spacing-md);
+        right: var(--spacing-md);
+    }
+    
+    .banner-btn {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .video-scroll-list .video-card {
+        width: 200px;
+    }
+    
+    .video-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-md);
+    }
+    
+    .modal-content.video-player-content {
+        width: 100%;
+        height: 100%;
+        max-width: none;
+        border-radius: 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .video-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .video-scroll-list .video-card {
+        width: 160px;
+    }
+}
+
+/* ==================== 视频加载占位符 ==================== */
+.video-skeleton {
+    background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-hover) 50%, var(--bg-tertiary) 75%);
+    background-size: 200% 100%;
+    animation: skeletonLoading 1.5s infinite;
+}
+
+@keyframes skeletonLoading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.video-card.skeleton .video-cover {
+    background: var(--bg-tertiary);
+}
+
+.video-card.skeleton .video-info {
+    pointer-events: none;
+}
+
+.video-card.skeleton .video-title {
+    height: 20px;
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--spacing-sm);
+}
+
+.video-card.skeleton .video-meta span {
+    height: 16px;
+    width: 80px;
+    border-radius: var(--radius-sm);
+}
+
+/* ==================== 全屏视频播放器 ==================== */
+.fullscreen-video {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    z-index: 2000;
+    display: none;
+}
+
+.fullscreen-video.active {
+    display: flex;
+    flex-direction: column;
+}
+
+.fullscreen-video video {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.fullscreen-controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: var(--spacing-lg);
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.fullscreen-close {
+    position: absolute;
+    top: var(--spacing-md);
+    right: var(--spacing-md);
+    width: 44px;
+    height: 44px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+}

@@ -1,0 +1,229 @@
+/**
+ * 视频播放器样式
+ */
+
+/* 全局样式 */
+.video-player-container {
+    min-height: 100vh;
+    background: #0f0f1a;
+    color: #fff;
+}
+
+/* 顶部导航 */
+.player-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+    background: rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.back-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #fff;
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    transition: background 0.2s;
+}
+
+.back-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.back-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+.back-btn span {
+    font-size: 14px;
+}
+
+.video-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: #e0e0e0;
+    flex: 1;
+    text-align: center;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.header-actions {
+    width: 80px;
+}
+
+/* 播放器容器 */
+.player-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    background: #000;
+}
+
+#videoPlayer {
+    display: block;
+    width: 100%;
+    max-height: 70vh;
+    background: #000;
+}
+
+/* 加载遮罩 */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.8);
+    gap: 16px;
+}
+
+.spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    border-top-color: #5c9ded;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.loading-overlay p {
+    font-size: 14px;
+    color: #aaa;
+}
+
+/* 错误信息 */
+.error-message {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.9);
+    gap: 16px;
+}
+
+.error-message svg {
+    width: 64px;
+    height: 64px;
+    color: #f44336;
+}
+
+.error-message p {
+    font-size: 16px;
+    color: #ccc;
+}
+
+.btn-retry {
+    padding: 10px 24px;
+    font-size: 14px;
+    color: #fff;
+    background: #5c9ded;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-retry:hover {
+    background: #4a8ad4;
+}
+
+/* 视频信息区域 */
+.video-info-section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+.video-info-header {
+    margin-bottom: 16px;
+}
+
+.video-name {
+    font-size: 24px;
+    font-weight: 600;
+    color: #fff;
+    margin: 0 0 12px 0;
+}
+
+.video-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    color: #999;
+}
+
+.meta-item svg {
+    width: 18px;
+    height: 18px;
+    color: #666;
+}
+
+.video-description {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #bbb;
+    margin: 0;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .player-header {
+        padding: 12px 16px;
+    }
+
+    .back-btn span {
+        display: none;
+    }
+
+    .video-title {
+        font-size: 14px;
+    }
+
+    .video-info-section {
+        padding: 16px;
+    }
+
+    .video-name {
+        font-size: 18px;
+    }
+
+    .video-meta {
+        gap: 16px;
+    }
+
+    .meta-item {
+        font-size: 12px;
+    }
+}

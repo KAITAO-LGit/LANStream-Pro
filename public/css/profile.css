@@ -1,0 +1,730 @@
+/**
+ * LANStream Pro - 个人资料页面样式
+ * 科技感设计，居中布局
+ */
+
+/* 使用主样式文件的变量 */
+:root {
+    --primary-color: #5c9ded;
+    --primary-hover: #4a8be0;
+    --primary-light: rgba(92, 157, 237, 0.1);
+    --success-color: #34c759;
+    --success-light: rgba(52, 199, 89, 0.1);
+    --warning-color: #ff9500;
+    --warning-light: rgba(255, 149, 0, 0.1);
+    --danger-color: #ff3b30;
+    --danger-light: rgba(255, 59, 48, 0.1);
+    --text-primary: #1a2a3a;
+    --text-secondary: #5a6a7a;
+    --text-tertiary: #8a9aaa;
+    --bg-color: #f5f9fc;
+    --bg-secondary: #ffffff;
+    --border-color: #e8eef3;
+    --shadow-sm: 0 2px 8px rgba(92, 157, 237, 0.08);
+    --shadow-md: 0 4px 16px rgba(92, 157, 237, 0.12);
+    --shadow-lg: 0 8px 32px rgba(92, 157, 237, 0.16);
+    --shadow-glow: 0 0 20px rgba(92, 157, 237, 0.3);
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-full: 50%;
+    --transition-fast: all 0.2s ease;
+    --transition-normal: all 0.3s ease;
+    --transition-slow: all 0.4s ease;
+}
+
+/* ==================== 页面容器 ==================== */
+.profile-page-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 32px;
+}
+
+/* ==================== 页面头部 ==================== */
+.profile-header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.profile-header h1 {
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+}
+
+.profile-header h1 i {
+    color: var(--primary-color);
+    font-size: 36px;
+    text-shadow: 0 0 20px rgba(92, 157, 237, 0.4);
+}
+
+.profile-header p {
+    color: var(--text-secondary);
+    font-size: 16px;
+    letter-spacing: 1px;
+}
+
+/* ==================== 卡片网格布局 ==================== */
+.profile-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+}
+
+/* ==================== 通用卡片样式 ==================== */
+.profile-card {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    transition: var(--transition-normal);
+    position: relative;
+    border: 1px solid var(--border-color);
+}
+
+.profile-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color), #764ba2);
+    opacity: 0;
+    transition: var(--transition-fast);
+}
+
+.profile-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-4px);
+}
+
+.profile-card:hover::before {
+    opacity: 1;
+}
+
+/* 图标区域 - 居中 */
+.profile-card .card-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    margin: 32px auto 24px;
+    position: relative;
+    z-index: 1;
+}
+
+.profile-card .card-icon::after {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border-radius: var(--radius-full);
+    border: 2px solid transparent;
+    background: linear-gradient(135deg, var(--primary-color), #764ba2) border-box;
+    -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: var(--transition-fast);
+}
+
+.profile-card:hover .card-icon::after {
+    opacity: 1;
+}
+
+.profile-card.avatar-card .card-icon {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+}
+
+.profile-card.info-card .card-icon {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(79, 172, 254, 0.4);
+}
+
+.profile-card.password-card .card-icon {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(67, 233, 123, 0.4);
+}
+
+/* 卡片内容 */
+.profile-card .card-content {
+    padding: 0 28px 28px;
+    text-align: center;
+}
+
+.profile-card .card-content h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-color);
+    position: relative;
+}
+
+.profile-card .card-content h3::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--primary-color), #764ba2);
+}
+
+/* ==================== 头像容器 ==================== */
+.avatar-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.avatar-wrapper {
+    position: relative;
+    width: 140px;
+    height: 140px;
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: var(--shadow-md);
+    transition: var(--transition-normal);
+    border: 4px solid #fff;
+}
+
+.avatar-wrapper:hover {
+    transform: scale(1.08);
+    box-shadow: var(--shadow-glow);
+}
+
+.avatar-display {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 56px;
+    font-weight: 600;
+    color: #fff;
+    background: linear-gradient(135deg, var(--primary-color), #764ba2);
+}
+
+.avatar-display img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-initials {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.avatar-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    opacity: 0;
+    transition: var(--transition-fast);
+}
+
+.avatar-wrapper:hover .avatar-overlay {
+    opacity: 1;
+}
+
+.avatar-overlay i {
+    font-size: 36px;
+    color: #fff;
+}
+
+.avatar-overlay span {
+    font-size: 14px;
+    color: #fff;
+    font-weight: 500;
+}
+
+.avatar-hint {
+    font-size: 13px;
+    color: var(--text-tertiary);
+    background: var(--bg-color);
+    padding: 8px 16px;
+    border-radius: var(--radius-md);
+}
+
+/* ==================== 信息列表 - 居中布局 ==================== */
+.info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 28px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, var(--bg-color), #fff);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    transition: var(--transition-fast);
+}
+
+.info-item:hover {
+    background: var(--primary-light);
+    border-color: var(--primary-color);
+    transform: scale(1.02);
+}
+
+.info-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.info-label i {
+    width: 20px;
+    text-align: center;
+    color: var(--primary-color);
+    font-size: 14px;
+}
+
+.info-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    word-break: break-all;
+}
+
+.info-value-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.info-input {
+    width: 100%;
+    max-width: 200px;
+    padding: 8px 12px;
+    border: 2px solid var(--primary-color);
+    border-radius: var(--radius-sm);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    background: #fff;
+    text-align: center;
+    transition: var(--transition-fast);
+}
+
+.info-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.info-input:disabled {
+    background: var(--bg-color);
+    border-color: var(--border-color);
+    color: var(--text-secondary);
+}
+
+/* ==================== 编辑操作按钮 ==================== */
+.edit-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.btn-save-profile,
+.btn-cancel-edit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.btn-save-profile {
+    background: linear-gradient(135deg, var(--success-color), #30d158);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(52, 199, 89, 0.3);
+}
+
+.btn-save-profile:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(52, 199, 89, 0.4);
+}
+
+.btn-cancel-edit {
+    background: var(--bg-color);
+    color: var(--text-secondary);
+    border: 2px solid var(--border-color);
+}
+
+.btn-cancel-edit:hover {
+    background: var(--danger-light);
+    border-color: var(--danger-color);
+    color: var(--danger-color);
+}
+
+/* ==================== 编辑资料按钮 ==================== */
+.btn-edit-profile {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 32px;
+    background: linear-gradient(135deg, var(--primary-color), #764ba2);
+    border: none;
+    border-radius: var(--radius-lg);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    box-shadow: 0 4px 15px rgba(92, 157, 237, 0.3);
+}
+
+.btn-edit-profile:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(92, 157, 237, 0.4);
+}
+
+.btn-edit-profile:active {
+    transform: translateY(0);
+}
+
+.btn-edit-profile i {
+    font-size: 16px;
+}
+
+/* ==================== 表单样式 - 居中布局 ==================== */
+.profile-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.form-group label i {
+    width: 18px;
+    text-align: center;
+    color: var(--primary-color);
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-wrapper input {
+    width: 100%;
+    padding: 14px 48px 14px 18px;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 15px;
+    color: var(--text-primary);
+    background: var(--bg-color);
+    transition: var(--transition-fast);
+    text-align: center;
+}
+
+.input-wrapper input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    background: #fff;
+    box-shadow: 0 0 0 4px var(--primary-light);
+}
+
+.input-wrapper input::placeholder {
+    color: var(--text-tertiary);
+    text-align: center;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 16px;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    padding: 4px;
+}
+
+.toggle-password:hover {
+    color: var(--primary-color);
+    transform: scale(1.1);
+}
+
+/* 密码强度指示器 */
+.password-strength {
+    height: 6px;
+    border-radius: 3px;
+    background: var(--bg-color);
+    overflow: hidden;
+    margin-top: 8px;
+    position: relative;
+}
+
+.password-strength::before {
+    content: '';
+    display: block;
+    height: 100%;
+    width: var(--strength, 0%);
+    border-radius: 3px;
+    transition: var(--transition-normal);
+}
+
+.password-strength.weak::before {
+    width: 33%;
+    background: linear-gradient(90deg, var(--danger-color), #ff6b6b);
+}
+
+.password-strength.medium::before {
+    width: 66%;
+    background: linear-gradient(90deg, var(--warning-color), #ffd93d);
+}
+
+.password-strength.strong::before {
+    width: 100%;
+    background: linear-gradient(90deg, var(--success-color), #6dd5ed);
+}
+
+/* 密码匹配提示 */
+.password-match {
+    font-size: 12px;
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    transition: var(--transition-fast);
+}
+
+.password-match.match {
+    color: var(--success-color);
+    background: var(--success-light);
+}
+
+.password-match.mismatch {
+    color: var(--danger-color);
+    background: var(--danger-light);
+}
+
+/* ==================== 表单操作按钮 ==================== */
+.form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.form-actions .btn-primary,
+.form-actions .btn-secondary {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 16px 24px;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.form-actions .btn-primary {
+    background: linear-gradient(135deg, var(--primary-color), #764ba2);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(92, 157, 237, 0.3);
+}
+
+.form-actions .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(92, 157, 237, 0.4);
+}
+
+.form-actions .btn-secondary {
+    background: var(--bg-color);
+    color: var(--text-secondary);
+    border: 2px solid var(--border-color);
+}
+
+.form-actions .btn-secondary:hover {
+    background: var(--border-color);
+    color: var(--text-primary);
+    transform: translateY(-2px);
+}
+
+/* ==================== 响应式设计 ==================== */
+@media (max-width: 1200px) {
+    .profile-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .profile-page-container {
+        padding: 20px;
+    }
+
+    .profile-header {
+        margin-bottom: 28px;
+        padding-bottom: 24px;
+    }
+
+    .profile-header h1 {
+        font-size: 26px;
+    }
+
+    .profile-header h1 i {
+        font-size: 30px;
+    }
+
+    .profile-header p {
+        font-size: 14px;
+    }
+
+    .profile-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .profile-card .card-icon {
+        width: 70px;
+        height: 70px;
+        font-size: 28px;
+        margin: 24px auto 20px;
+    }
+
+    .avatar-wrapper {
+        width: 120px;
+        height: 120px;
+    }
+
+    .avatar-display {
+        font-size: 48px;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions .btn-primary,
+    .form-actions .btn-secondary {
+        width: 100%;
+    }
+}
+
+/* ==================== 动画效果 ==================== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.profile-card {
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+.profile-card:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.profile-card:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.profile-card:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+/* ==================== 成功/错误提示 ==================== */
+.form-message {
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    animation: fadeInUp 0.3s ease;
+}
+
+.form-message.success {
+    background: var(--success-light);
+    color: var(--success-color);
+    border: 1px solid var(--success-color);
+}
+
+.form-message.error {
+    background: var(--danger-light);
+    color: var(--danger-color);
+    border: 1px solid var(--danger-color);
+}
+
+.form-message i {
+    font-size: 16px;
+}
